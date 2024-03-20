@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyDjInxTF2CDE-HxqJj0GOKWx2lhoCUGwIA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>811802718965</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.spencerFrontend.RunnerTests</string>
+	<key>PROJECT_ID</key>
+	<string>spencer-60175</string>
+	<key>STORAGE_BUCKET</key>
+	<string>spencer-60175.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:811802718965:ios:6ee995e7e90221716b4bbc</string>
+</dict>
+</plist>

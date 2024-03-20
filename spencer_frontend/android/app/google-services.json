@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "811802718965",
+    "project_id": "spencer-60175",
+    "storage_bucket": "spencer-60175.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811802718965:android:85b86b50ff4107b36b4bbc",
+        "android_client_info": {
+          "package_name": "com.example.spencer_frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3tnENZoLHipifukrcKrz6YVS_VNmUp2E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
