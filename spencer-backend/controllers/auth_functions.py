@@ -64,14 +64,14 @@ def create_access_token(user_data: dict, expires_delta: timedelta = None):
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
-        payload = await jwt.decode(token, SECRET_KEY, algorithms=[HASHING_ALGORITHM])
-        user_id = await payload.get("sub")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[HASHING_ALGORITHM])
+        user_id = payload.get("sub")
         if user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     
-    user = await users_collection.find_one({"_id": ObjectId(users_collection)})
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
 
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")

@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class ExpenseCategory(BaseModel):
     name: str
@@ -14,7 +15,7 @@ class Expense(BaseModel):
     description: str
     amount_spent: float
     expense_category: str
-    date_spent: str
+    date_spent: datetime = datetime.now()
 
     def to_dict(self):
         return self.model_dump()
