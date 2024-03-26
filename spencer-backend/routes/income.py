@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from models.user import UserInDB
+from fastapi import APIRouter, Depends, HTTPException
 from database.db import income_collection
 from controllers.auth_functions import get_current_user
 from models.income import Income

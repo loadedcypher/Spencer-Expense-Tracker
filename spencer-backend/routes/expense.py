@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from models.user import UserInDB
 from database.db import budget_collection, expense_collection
 from controllers.auth_functions import get_current_user
