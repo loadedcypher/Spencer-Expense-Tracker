@@ -11,5 +11,6 @@ class Income(BaseModel):
         return self.model_dump()
     
 class Budget(BaseModel):
+    user_id: str
     category: str
     amount: float

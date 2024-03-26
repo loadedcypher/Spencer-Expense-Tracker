@@ -1,16 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-class ExpenseCategory(BaseModel):
-    name: str
-    description: str
-    budget: float
-    color: str
-
-    def to_dict(self):
-        return self.model_dump()
-
 class Expense(BaseModel):
+    user_id: str
     title: str
     description: str
     amount_spent: float
