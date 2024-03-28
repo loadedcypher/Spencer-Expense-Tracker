@@ -5,6 +5,47 @@ import 'dart:math';
 
 import 'package:spencer_frontend/utils/auth_utils.dart';
 
+class Stack<T> {
+  final List<T> _items = [];
+
+  void push(T item) {
+    _items.add(item);
+  }
+
+  void pushAll(List<T> items) {
+    _items.addAll(items);
+  }
+
+  T pop() {
+    if (isEmpty()) {
+      throw StateError('Cannot pop from an empty stack');
+    }
+    return _items.removeLast();
+  }
+
+  T peek() {
+    if (isEmpty()) {
+      throw StateError('Cannot peek into an empty stack');
+    }
+    return _items.last;
+  }
+
+  bool isEmpty() {
+    return _items.isEmpty;
+  }
+
+  int size() {
+    return _items.length;
+  }
+
+  T peekAt(int index) {
+    if (index < 0 || index >= size()) {
+      throw RangeError.index(index, this, 'index', null, size());
+    }
+    return _items[index];
+  }
+}
+
 class BudgetPage extends StatefulWidget {
   const BudgetPage({Key? key}) : super(key: key);
 
@@ -13,10 +54,7 @@ class BudgetPage extends StatefulWidget {
 }
 
 class _BudgetPageState extends State<BudgetPage> {
-  List<dynamic> _budget_list = [];
-  final _formKey = GlobalKey<FormState>();
-  String? _category;
-  double _amount = 0.0;
+  Stack<dynamic> _budgetStack = Stack<dynamic>();
 
   @override
   void initState() {
@@ -36,7 +74,8 @@ class _BudgetPageState extends State<BudgetPage> {
 
       if (response.statusCode == 200) {
         setState(() {
-          _budget_list = json.decode(response.body);
+          _budgetStack = Stack<dynamic>();
+          _budgetStack.pushAll(json.decode(response.body));
         });
       } else {
         print('Failed to fetch expenses: ${response.statusCode}');
@@ -46,14 +85,10 @@ class _BudgetPageState extends State<BudgetPage> {
     }
   }
 
-  Future<void> _addBudget() async {
+  Future<void> _addBudget(dynamic budget) async {
     try {
       String? token = await getToken();
-
-      final requestBody = json.encode({
-        'category': _category,
-        'amount': _amount,
-      });
+      final requestBody = json.encode(budget);
 
       final response = await http.post(
         Uri.parse('http://localhost:8000/add_budget'),
@@ -66,7 +101,6 @@ class _BudgetPageState extends State<BudgetPage> {
 
       if (response.statusCode == 200) {
         _fetchBudgets();
-        _clearForm();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Budget added successfully'),
@@ -84,19 +118,11 @@ class _BudgetPageState extends State<BudgetPage> {
     }
   }
 
-  void _clearForm() {
-    setState(() {
-      _category = '';
-      _amount = 0.0;
-    });
-  }
-
-  Future<void> _deleteBudget(String category) async {
+  Future<void> _deleteBudget(dynamic budget) async {
     try {
       String? token = await getToken();
-
       final response = await http.delete(
-        Uri.parse('http://localhost:8000/delete_budget/$category'),
+        Uri.parse('http://localhost:8000/delete_budget/${budget['category']}'),
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -121,136 +147,62 @@ class _BudgetPageState extends State<BudgetPage> {
     }
   }
 
-  void _editBudget(String category) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Budget'),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  initialValue: _category,
-                  decoration: const InputDecoration(
-                    labelText: 'Budget Category',
-                  ),
-                  keyboardType: TextInputType.text,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Enter a Budget category please';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      _category = value;
-                    });
-                  },
-                ),
-                TextFormField(
-                  initialValue: _amount.toString(),
-                  decoration: const InputDecoration(
-                    labelText: 'Amount Spent',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter an amount';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      _amount = double.parse(value);
-                    });
-                  },
-                ),
-              ],
-            ),
+  void _editBudget(dynamic oldBudget, dynamic newBudget) async {
+    try {
+      String? token = await getToken();
+      final requestBody = json.encode(newBudget);
+
+      final response = await http.put(
+        Uri.parse(
+            'http://localhost:8000/update_budget/${oldBudget['category']}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: requestBody,
+      );
+
+      if (response.statusCode == 200) {
+        _fetchBudgets();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Budget updated successfully'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  // Call update budget API
-                  try {
-                    String? token = await getToken();
-
-                    final requestBody = json.encode({
-                      'category': _category,
-                      'amount': _amount,
-                    });
-
-                    final response = await http.put(
-                      Uri.parse(
-                          'http://localhost:8000/update_budget/$category'),
-                      headers: {
-                        'Authorization': 'Bearer $token',
-                        'Content-Type': 'application/json',
-                      },
-                      body: requestBody,
-                    );
-
-                    if (response.statusCode == 200) {
-                      _fetchBudgets();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Budget updated successfully'),
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                              'Failed to update budget: ${response.statusCode}'),
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    print('Error: $e');
-                  }
-                }
-              },
-              child: const Text('Update'),
-            ),
-          ],
         );
-      },
-    );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update budget: ${response.statusCode}'),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _budget_list.isNotEmpty
-          ? ListView.builder(
-              itemCount: _budget_list.length,
+      body: _budgetStack.isEmpty()
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView.builder(
+              itemCount: _budgetStack.size(),
               itemBuilder: (context, index) {
-                final budget = _budget_list[index];
+                final budget = _budgetStack.peekAt(index);
                 return BudgetCard(
                   category: budget['category'],
                   amount: budget['amount'],
                   onDelete: () {
-                    _deleteBudget(budget['category']);
+                    _deleteBudget(budget);
                   },
                   onEdit: () {
-                    _editBudget(budget['category']);
+                    _editBudget(budget, budget);
                   },
                 );
               },
-            )
-          : const Center(
-              child: CircularProgressIndicator(),
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -265,10 +217,12 @@ class _BudgetPageState extends State<BudgetPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        String category = '';
+        double amount = 0.0;
+
         return AlertDialog(
           title: const Text('Add Expense'),
           content: Form(
-            key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -285,7 +239,7 @@ class _BudgetPageState extends State<BudgetPage> {
                     return null;
                   },
                   onChanged: (value) {
-                    _category = value;
+                    category = value;
                   },
                 ),
                 TextFormField(
@@ -300,7 +254,7 @@ class _BudgetPageState extends State<BudgetPage> {
                     return null;
                   },
                   onChanged: (value) {
-                    _amount = double.parse(value);
+                    amount = double.tryParse(value) ?? 0.0;
                   },
                 ),
               ],
@@ -315,8 +269,8 @@ class _BudgetPageState extends State<BudgetPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _addBudget();
+                if (category.isNotEmpty && amount > 0) {
+                  _addBudget({'category': category, 'amount': amount});
                   Navigator.of(context).pop();
                 }
               },
