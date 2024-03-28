@@ -1,16 +1,22 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
+from bson.objectid import ObjectId
 
-class Expense(BaseModel):
-    user_id: str
+class ExpenseRequest(BaseModel):
     title: str
-    description: str
+    description: Optional[str]
     amount_spent: float
     expense_category: str
-    date_spent: datetime = datetime.now()
+    
+class Expense(ExpenseRequest):
+    user_id: ObjectId
+    date_spent: datetime 
 
-    def to_dict(self):
-        return self.model_dump()
+    class Config:
+        arbitrary_types_allowed = True
+
+    
 
 
     

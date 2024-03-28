@@ -7,7 +7,7 @@ from datetime import timedelta
 
 router = APIRouter()
 
-# route to register new user
+# request to register new user
 
 @router.post("/create-user")
 async def create_user(email : str, form_data: OAuth2PasswordRequestForm = Depends() ):

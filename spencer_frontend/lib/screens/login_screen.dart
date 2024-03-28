@@ -1,10 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:spencer_frontend/utils/auth_utils.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -28,6 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
           'password': _password,
         },
       );
+
       if (response.statusCode == 200) {
         // Login successful
         final responseData = json.decode(response.body);
@@ -37,11 +39,13 @@ class _LoginScreenState extends State<LoginScreen> {
         // Navigate to the home screen
         Navigator.pushReplacementNamed(context, '/home');
       } else {
-        // Login failed
-        print('Login failed: ${response.body}');
+        final snackBar =
+            SnackBar(content: Text('Login failed: ${response.body}'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } catch (e) {
-      print('Error: $e');
+      final snackBar = SnackBar(content: Text('Login failed: $e'));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } finally {
       setState(() {
         _isLoading = false;
@@ -52,60 +56,88 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Username',
+              Text(
+                'Log In To Spenser',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
                 ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your username';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  _username = value;
-                },
               ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  _password = value;
-                },
-              ),
-              SizedBox(height: 16.0),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _loginUser();
+              const SizedBox(height: 32.0),
+              Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please enter your username';
                         }
+                        return null;
                       },
-                      child: Text('Login'),
+                      onChanged: (value) {
+                        _username = value;
+                      },
                     ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/register');
-                },
-                child: Text('Register'),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      obscureText: true,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        _password = value;
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _loginUser();
+                              }
+                            },
+                            child: const Text('Login'),
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                          ),
+                    const SizedBox(height: 16.0),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/register');
+                      },
+                      child:
+                          const Text("Don't have an account? Register Here."),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
